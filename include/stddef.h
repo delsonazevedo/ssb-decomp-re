@@ -27,4 +27,18 @@ typedef __PTRDIFF_TYPE__ ptrdiff_t;
 #define _PTRDIFF_T_DEFINED_
 #endif
 
+/* wint_t. Same story as ptrdiff_t above, but the offender is devkitPro's
+ * newlib (Switch): <sys/_types.h> does `#define __need_wint_t` then
+ * `#include <stddef.h>`, expecting the compiler's stddef to define wint_t for
+ * it. Our shim shadows that real stddef and has an include guard, so the
+ * second (__need_wint_t) include is a no-op and wint_t never appears —
+ * newlib's _mbstate_t then fails with "unknown type name 'wint_t'". Define it
+ * up front from the compiler builtin. Harmless on glibc/bionic (identical
+ * typedef); _WINT_T also stops newlib's real stddef path from re-typedef'ing. */
+#if (defined(__GNUC__) || defined(__clang__)) && !defined(_WINT_T) && !defined(_WINT_T_DEFINED_)
+typedef __WINT_TYPE__ wint_t;
+#define _WINT_T
+#define _WINT_T_DEFINED_
+#endif
+
 #endif /* __STDDEF_H__ */
